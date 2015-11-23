@@ -1,8 +1,8 @@
 {
-  "name": "gatsby",
-  "description": "React.js Static Site Generator",
-  "version": "0.7.0",
-  "author": "Kyle Mathews <mathews.kyle@gmail.com>",
+  "name": "syncano-gatsby",
+  "description": "This repo is not official distribution of Gatsby. The original source is <a href='https://www.npmjs.com/package/gatsby'>here</a>.",
+  "version": "0.7.0-1",
+  "author": "Patryk Kopycinski <patryk.kopycinski@syncano.com>",
   "bin": {
     "gatsby": "./bin/cli.js"
   },
