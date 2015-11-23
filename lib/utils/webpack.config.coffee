@@ -1,5 +1,6 @@
 webpack = require 'webpack'
 StaticSiteGeneratorPlugin = require 'static-site-generator-webpack-plugin'
+ExtractTextPlugin = require 'extract-text-webpack-plugin'
 
 gatsbyLib = /(gatsby.lib)/i
 libDirs = /(node_modules|bower_components)/i
@@ -26,6 +27,7 @@ module.exports = (program, directory, stage, webpackPort = 1500, routes=[]) ->
       when "production"
         filename: "bundle.js"
         path: directory + "/public"
+        publicPath: "/"
       when "static"
         path: directory + "/public"
         filename: "bundle.js"
@@ -69,6 +71,7 @@ module.exports = (program, directory, stage, webpackPort = 1500, routes=[]) ->
             }
             __PREFIX_LINKS__: program.prefixLinks
           })
+          new ExtractTextPlugin("style.css")
           new webpack.optimize.DedupePlugin()
           new webpack.optimize.UglifyJsPlugin()
         ]
@@ -81,6 +84,7 @@ module.exports = (program, directory, stage, webpackPort = 1500, routes=[]) ->
             }
             __PREFIX_LINKS__: program.prefixLinks
           })
+          new ExtractTextPlugin("style.css")
         ]
 
   resolve = ->
@@ -103,12 +107,7 @@ module.exports = (program, directory, stage, webpackPort = 1500, routes=[]) ->
           { test: /\.css$/, loaders: ['style', 'css']},
           { test: /\.cjsx$/, loaders: ['react-hot', 'coffee', 'cjsx']},
           {
-            test: /\.jsx?$/,
-            exclude: babelExcludeTest
-            loaders: ['react-hot', 'babel']
-          }
-          {
-            test: /\.js?$/,
+            test: /(\.js$|\.jsx$)/,
             exclude: babelExcludeTest
             loaders: ['react-hot', 'babel']
           }
@@ -118,27 +117,19 @@ module.exports = (program, directory, stage, webpackPort = 1500, routes=[]) ->
           { test: /\.html$/, loader: 'raw' }
           { test: /\.json$/, loaders: ['json'] }
           { test: /^((?!config).)*\.toml$/, loaders: ['toml'] } # Match everything except config.toml
-          { test: /\.png$/, loader: 'null' }
-          { test: /\.jpg$/, loader: 'null' }
-          { test: /\.svg$/, loader: 'null' }
-          { test: /\.ico$/, loader: 'null' }
           { test: /\.pdf$/, loader: 'null' }
           { test: /\.txt$/, loader: 'null' }
+          { test: /\.(eot|woff|woff2|ttf|svg|png|jpg|svg|ico|gif)$/, loader: 'url-loader?limit=40000&name=[path][name]-[hash].[ext]'}
           { test: /config\.[toml|yaml|json]/, loader: 'config', query: {
             directory: directory
           } }
         ]
       when "static"
         loaders: [
-          { test: /\.css$/, loaders: ['css']},
+          { test: /\.css$/, loader: ExtractTextPlugin.extract("style-loader", "css-loader")},
           { test: /\.cjsx$/, loaders: ['coffee', 'cjsx']},
           {
-            test: /\.jsx?$/,
-            exclude: babelExcludeTest
-            loaders: ['babel']
-          }
-          {
-            test: /\.js?$/,
+            test: /(\.js$|\.jsx$)/,
             exclude: babelExcludeTest
             loaders: ['babel']
           }
@@ -148,27 +139,19 @@ module.exports = (program, directory, stage, webpackPort = 1500, routes=[]) ->
           { test: /\.html$/, loader: 'raw' }
           { test: /\.json$/, loaders: ['json'] }
           { test: /^((?!config).)*\.toml$/, loaders: ['toml'] } # Match everything except config.toml
-          { test: /\.png$/, loader: 'null' }
-          { test: /\.jpg$/, loader: 'null' }
-          { test: /\.svg$/, loader: 'null' }
-          { test: /\.ico$/, loader: 'null' }
           { test: /\.pdf$/, loader: 'null' }
           { test: /\.txt$/, loader: 'null' }
+          { test: /\.(eot|woff|woff2|ttf|svg|png|jpg|svg|ico|gif)$/, loader: 'url-loader?limit=40000&name=[name]-[hash].[ext]'}
           { test: /config\.[toml|yaml|json]/, loader: 'config', query: {
             directory: directory
           } }
         ]
       when "production"
         loaders: [
-          { test: /\.css$/, loaders: ['style', 'css']},
+          { test: /\.css$/, loader: ExtractTextPlugin.extract("style-loader", "css-loader")},
           { test: /\.cjsx$/, loaders: ['coffee', 'cjsx']},
           {
-            test: /\.jsx?$/,
-            exclude: babelExcludeTest
-            loaders: ['babel']
-          }
-          {
-            test: /\.js?$/,
+            test: /(\.js$|\.jsx$)/,
             exclude: babelExcludeTest
             loaders: ['babel']
           }
@@ -178,12 +161,9 @@ module.exports = (program, directory, stage, webpackPort = 1500, routes=[]) ->
           { test: /\.html$/, loader: 'raw' }
           { test: /\.json$/, loaders: ['json'] }
           { test: /^((?!config).)*\.toml$/, loaders: ['toml'] } # Match everything except config.toml
-          { test: /\.png$/, loader: 'null' }
-          { test: /\.jpg$/, loader: 'null' }
-          { test: /\.svg$/, loader: 'null' }
-          { test: /\.ico$/, loader: 'null' }
           { test: /\.pdf$/, loader: 'null' }
           { test: /\.txt$/, loader: 'null' }
+          { test: /\.(eot|woff|woff2|ttf|svg|png|jpg|svg|ico|gif)$/, loader: 'url-loader?limit=40000&name=[name]-[hash].[ext]'}
           { test: /config\.[toml|yaml|json]/, loader: 'config', query: {
             directory: directory
           } }
@@ -197,7 +177,7 @@ module.exports = (program, directory, stage, webpackPort = 1500, routes=[]) ->
     devtool: devtool()
     output: output()
     resolveLoader: {
-      modulesDirectories: ["#{directory}/node_modules", "#{__dirname}/../../node_modules", "#{__dirname}/../loaders"]
+      modulesDirectories: ["#{__dirname}/../../node_modules", "#{directory}/node_modules", "#{__dirname}/../loaders"]
     },
     plugins: plugins()
     resolve: resolve()
